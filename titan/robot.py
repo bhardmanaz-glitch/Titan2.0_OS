@@ -60,9 +60,9 @@ class TitanRobot:
         # LEFT KNEE
         ####################################################
 
-        left_knee_motor = Motor(
-            name="Left Knee Motor",
-            axis_id=0
+        left_knee_motor = OdriveAxis(
+            name="Left Knee",
+            axis_id=1
         )
 
         left_knee_encoder = Encoder()

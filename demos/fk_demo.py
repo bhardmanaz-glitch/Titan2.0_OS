@@ -1,5 +1,5 @@
-from titan.math.ik import solve_ik
-from titan.math.fk import solve_fk
+from titan.kinematics.ik import solve_ik
+from titan.kinematics.fk import solve_fk
 
 x = 0.0
 y = -0.292

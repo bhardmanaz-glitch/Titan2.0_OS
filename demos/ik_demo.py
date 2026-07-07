@@ -1,4 +1,4 @@
-from titan.math.ik import solve_ik
+from titan.kinematics.ik import solve_ik
 
 result = solve_ik(
     x=0.0,
