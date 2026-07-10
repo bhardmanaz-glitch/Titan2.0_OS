@@ -58,6 +58,10 @@ class LegPlanner:
                 knee_plan.duration,
             )
 
+            print()
+            print("Synchronized Duration")
+            print(duration)
+
         #
         # Now generate synchronized trajectories.
         #

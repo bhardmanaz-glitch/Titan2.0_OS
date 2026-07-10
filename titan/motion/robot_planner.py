@@ -8,61 +8,62 @@ class RobotTrajectoryPlanner:
 
     def __init__(
         self,
-        front_left,
-        front_right,
-        rear_left,
-        rear_right,
+        left_front,
+        right_front,
+        left_rear,
+        right_rear,
     ):
-        self.front_left = front_left
-        self.front_right = front_right
-        self.rear_left = rear_left
-        self.rear_right = rear_right
+        self.left_front = left_front
+        self.right_front = right_front
+        self.left_rear = left_rear
+        self.right_rear = right_rear
 
     def generate(
         self,
-        front_left_start,
-        front_left_end,
-        front_right_start,
-        front_right_end,
-        rear_left_start,
-        rear_left_end,
-        rear_right_start,
-        rear_right_end,
+        left_front_start,
+        left_front_end,
+        right_front_start,
+        right_front_end,
+        left_rear_start,
+        left_rear_end,
+        right_rear_start,
+        right_rear_end,
         duration=None,
         dt=0.02,
     ):
 
-        fl = self.front_left.generate(
-            foot_start=front_left_start,
-            foot_end=front_left_end,
+        fl = self.left_front.generate(
+            foot_start=left_front_start,
+            foot_end=left_front_end,
             duration=duration,
             dt=dt,
         )
 
-        fr = self.front_right.generate(
-            foot_start=front_right_start,
-            foot_end=front_right_end,
+        fr = self.right_front.generate(
+            foot_start=right_front_start,
+            foot_end=right_front_end,
             duration=duration,
             dt=dt,
         )
 
-        rl = self.rear_left.generate(
-            foot_start=rear_left_start,
-            foot_end=rear_left_end,
+        rl = self.left_rear.generate(
+            foot_start=left_rear_start,
+            foot_end=left_rear_end,
             duration=duration,
             dt=dt,
         )
 
-        rr = self.rear_right.generate(
-            foot_start=rear_right_start,
-            foot_end=rear_right_end,
+        rr = self.right_rear.generate(
+            foot_start=right_rear_start,
+            foot_end=right_rear_end,
             duration=duration,
             dt=dt,
         )
 
         return RobotTrajectory(
-            front_left=fl,
-            front_right=fr,
-            rear_left=rl,
-            rear_right=rr,
+            left_front=fl,
+            right_front=fr,
+            left_rear=rl,
+            right_rear=rr,
         )
+            

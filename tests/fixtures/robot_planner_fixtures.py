@@ -15,8 +15,8 @@ def robot_planner(
     )
 
     return RobotTrajectoryPlanner(
-        front_left=leg,
-        front_right=leg,
-        rear_left=leg,
-        rear_right=leg,
+        left_front=leg,
+        right_front=leg,
+        left_rear=leg,
+        right_rear=leg,
     )

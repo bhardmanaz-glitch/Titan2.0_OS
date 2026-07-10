@@ -5,19 +5,19 @@ from titan.motion.trajectory import LegTrajectory
 
 @dataclass
 class RobotTrajectory:
-    front_left: LegTrajectory
-    front_right: LegTrajectory
-    rear_left: LegTrajectory
-    rear_right: LegTrajectory
+    left_front: LegTrajectory
+    right_front: LegTrajectory
+    left_rear: LegTrajectory
+    right_rear: LegTrajectory
     
 
     @property
     def legs(self):
         return (
-            self.front_left,
-            self.front_right,
-            self.rear_left,
-            self.rear_right,
+            self.left_front,
+            self.right_front,
+            self.left_rear,
+            self.right_rear,
         )
 
     @property
@@ -39,8 +39,8 @@ class RobotTrajectory:
     
     def as_dict(self):
         return {
-            "front_left": self.front_left,
-            "front_right": self.front_right,
-            "rear_left": self.rear_left,
-            "rear_right": self.rear_right,
-    }
+            "left_front": self.left_front,
+            "right_front": self.right_front,
+            "left_rear": self.left_rear,
+            "right_rear": self.right_rear,
+        }

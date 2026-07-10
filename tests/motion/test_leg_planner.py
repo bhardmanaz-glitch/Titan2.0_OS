@@ -54,10 +54,17 @@ def test_duration_matches(leg_planner):
 
 def test_reverse_motion(leg_planner):
 
+    start = leg_planner.ik_solver.solve(.150, -.150)
+    end   = leg_planner.ik_solver.solve(.100, -.150)
+
     leg = leg_planner.generate(
         foot_start=(.150, -.150),
         foot_end=(.100, -.150),
-    )
+    )   
 
-    assert leg.hip[0].position > leg.hip[-1].position
+    assert leg.hip.first.position == pytest.approx(start.hip)
+    assert leg.hip.last.position  == pytest.approx(end.hip)
+
+    assert leg.knee.first.position == pytest.approx(start.knee)
+    assert leg.knee.last.position  == pytest.approx(end.knee)
 

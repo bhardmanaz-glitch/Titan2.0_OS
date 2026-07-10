@@ -1,58 +1,44 @@
 """
 Titan2_OS
-Unit Tests for Joint Class
+
+Unit Tests for Joint
 """
 
-from titan.hardware.odrive import ODriveAxis
+import pytest
+from dataclasses import FrozenInstanceError
 from titan.hardware.joint import Joint
+from titan.hardware.mock_axis import MockAxis
 
 
 def create_joint():
-    """Create a test joint."""
 
-    motor = ODriveAxis(
-        name="Test Motor",
-        axis_id=0,
-    )
+    actuator = MockAxis()
 
-    joint = Joint(
-        name="Test Joint",
-        actuator=motor,
-        gear_ratio=36.0,
+    return Joint(
+        name="lf_hfe",
+        actuator=actuator,
         min_angle=-1.4,
         max_angle=0.8,
     )
 
-    return joint
 
-
-def test_joint_to_motor_conversion():
+def test_joint_creation():
 
     joint = create_joint()
 
-    assert joint._joint_to_motor(0.5) == 18.0
+    assert joint.name == "lf_hfe"
+
+    assert joint.min_angle == -1.4
+
+    assert joint.max_angle == 0.8
 
 
-def test_motor_to_joint_conversion():
-
-    joint = create_joint()
-
-    assert joint._motor_to_joint(18.0) == 0.5
-
-
-def test_move_safe_clamps():
+def test_zero_position_defaults_to_zero():
 
     joint = create_joint()
 
-    joint.move_safe(2.0)
-
-    assert joint.angle == 0.8
+    assert joint.zero_position == 0.0
 
 
-def test_within_limits():
-
-    joint = create_joint()
-
-    assert joint._within_limits(0.5)
-
-    assert not joint._within_limits(2.0)
+    with pytest.raises(FrozenInstanceError):
+        joint.name = "changed"

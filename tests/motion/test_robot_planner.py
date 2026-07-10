@@ -7,17 +7,17 @@ from titan.motion.trajectory import LegTrajectory
 def test_generate_returns_robot_trajectory(robot_planner):
 
     trajectory = robot_planner.generate(
-        front_left_start=(.100, -.1500),
-        front_left_end=(.120, -.1500),
+        left_front_start=(.100, -.150),
+        left_front_end=(.120, -.150),
 
-        front_right_start=(.100, -.1500),
-        front_right_end=(.120, -.1500),
+        right_front_start=(.100, -.150),
+        right_front_end=(.120, -.150),
 
-        rear_left_start=(.100, -.1500),
-        rear_left_end=(.120, -.1500),
+        left_rear_start=(.100, -.150),
+        left_rear_end=(.120, -.150),
 
-        rear_right_start=(.100, -.1500),
-        rear_right_end=(.120, -.1500),
+        right_rear_start=(.100, -.150),
+        right_rear_end=(.120, -.150),
 
         dt=0.02,
     )
@@ -28,46 +28,46 @@ def test_generate_returns_robot_trajectory(robot_planner):
 def test_contains_four_leg_trajectories(robot_planner):
 
     trajectory = robot_planner.generate(
-        front_left_start=(.100, -.1500),
-        front_left_end=(.120, -.1500),
+        left_front_start=(.100, -.150),
+        left_front_end=(.120, -.150),
 
-        front_right_start=(.100, -.1500),
-        front_right_end=(.120, -.1500),
+        right_front_start=(.100, -.150),
+        right_front_end=(.120, -.150),
 
-        rear_left_start=(.100, -.1500),
-        rear_left_end=(.120, -.1500),
+        left_rear_start=(.100, -.150),
+        left_rear_end=(.120, -.150),
 
-        rear_right_start=(.100, -.1500),
-        rear_right_end=(.120, -.1500),
+        right_rear_start=(.100, -.150),
+        right_rear_end=(.120, -.150),
     )
 
-    assert isinstance(trajectory.front_left, LegTrajectory)
-    assert isinstance(trajectory.front_right, LegTrajectory)
-    assert isinstance(trajectory.rear_left, LegTrajectory)
-    assert isinstance(trajectory.rear_right, LegTrajectory)
+    assert isinstance(trajectory.left_front, LegTrajectory)
+    assert isinstance(trajectory.right_front, LegTrajectory)
+    assert isinstance(trajectory.left_rear, LegTrajectory)
+    assert isinstance(trajectory.right_rear, LegTrajectory)
 
 
 def test_all_leg_durations_match(robot_planner):
 
     trajectory = robot_planner.generate(
-        front_left_start=(.100, -.1500),
-        front_left_end=(.120, -.1500),
+        left_front_start=(.100, -.150),
+        left_front_end=(.120, -.150),
 
-        front_right_start=(.100, -.1500),
-        front_right_end=(.120, -.1500),
+        right_front_start=(.100, -.150),
+        right_front_end=(.120, -.150),
 
-        rear_left_start=(.100, -.1500),
-        rear_left_end=(.120, -.1500),
+        left_rear_start=(.100, -.150),
+        left_rear_end=(.120, -.150),
 
-        rear_right_start=(.100, -.1500),
-        rear_right_end=(.120, -.1500),
+        right_rear_start=(.100, -.150),
+        right_rear_end=(.120, -.150),
     )
 
     durations = [
-        trajectory.front_left.duration,
-        trajectory.front_right.duration,
-        trajectory.rear_left.duration,
-        trajectory.rear_right.duration,
+        trajectory.left_front.duration,
+        trajectory.right_front.duration,
+        trajectory.left_rear.duration,
+        trajectory.right_rear.duration,
     ]
 
     assert len(set(durations)) == 1
