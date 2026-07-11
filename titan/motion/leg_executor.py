@@ -43,15 +43,4 @@ class LegExecutor:
 
         return trajectory
     
-    class LegExecutor:
-
-        def __init__(
-            self,
-            hip_executor,
-            knee_executor,
-        ):
-
-            self.hip_executor = hip_executor
-            self.knee_executor = knee_executor
-
-            self.scheduler = ExecutionScheduler()
+    

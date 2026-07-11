@@ -14,7 +14,7 @@ class JointPose:
     """
     Desired joint-space pose.
 
-    Angles are expressed in degrees.
+    Angles are expressed in radians.
     """
 
     hip: float

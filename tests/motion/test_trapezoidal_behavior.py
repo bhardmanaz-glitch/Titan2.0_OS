@@ -2,6 +2,7 @@ import pytest
 
 from titan.motion.behaviors.trapezoidal_behavior import TrapezoidalBehavior
 from titan.motion.foot_pose import FootPose
+from titan.motion.trajectory import MotionPoint, Trajectory
 
 @pytest.fixture
 def behavior() -> TrapezoidalBehavior:
@@ -284,3 +285,81 @@ def test_interpolate_preserves_type(behavior):
     )
 
     assert isinstance(pose, FootPose)
+
+def test_generate_returns_trajectory(behavior):
+
+    trajectory = behavior.generate(
+        FootPose(0.0, 0.0),
+        FootPose(1.0, 0.0),
+        duration=1.0,
+        dt=0.25,
+    )
+
+    assert isinstance(trajectory, Trajectory)
+
+def test_generate_sets_metadata(behavior):
+
+    trajectory = behavior.generate(
+        FootPose(0.0, 0.0),
+        FootPose(1.0, 0.0),
+        duration=1.0,
+        dt=0.25,
+    )
+
+    assert trajectory.start == FootPose(0.0, 0.0)
+    assert trajectory.end == FootPose(1.0, 0.0)
+    assert trajectory.duration == 1.0
+    assert trajectory.dt == 0.25
+
+def test_generate_returns_motion_points(behavior):
+
+    trajectory = behavior.generate(
+        FootPose(0.0, 0.0),
+        FootPose(1.0, 0.0),
+        duration=1.0,
+        dt=0.25,
+    )
+
+    assert all(
+        isinstance(point, MotionPoint)
+        for point in trajectory
+    )
+
+def test_generate_first_point_matches_start(behavior):
+
+    trajectory = behavior.generate(
+        FootPose(0.0, 0.0),
+        FootPose(1.0, 0.0),
+        duration=1.0,
+        dt=0.25,
+    )
+
+    assert trajectory.first.position == FootPose(0.0, 0.0)
+
+def test_generate_last_point_matches_end(behavior):
+
+    trajectory = behavior.generate(
+        FootPose(0.0, 0.0),
+        FootPose(1.0, 0.0),
+        duration=1.0,
+        dt=0.25,
+    )
+
+    assert trajectory.last.position == FootPose(1.0, 0.0)
+
+def test_generate_motion_point_times_are_monotonic(behavior):
+
+    trajectory = behavior.generate(
+        FootPose(0.0, 0.0),
+        FootPose(1.0, 0.0),
+        duration=1.0,
+        dt=0.25,
+    )
+
+    assert all(
+        earlier.time < later.time
+        for earlier, later in zip(
+            trajectory.points,
+            trajectory.points[1:],
+        )
+    )

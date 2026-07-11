@@ -14,13 +14,7 @@ class TrapezoidalBehavior(MotionBehavior[FootPose]):
         duration: float,
         dt: float,
     ) -> Trajectory[FootPose]:
-        
-        if duration < 0:
-            raise ValueError("Duration must be non-negative.")
 
-        if dt <= 0:
-            raise ValueError("dt must be greater than zero.")
-        
         self._validate_inputs(
             start,
             end,
@@ -28,8 +22,48 @@ class TrapezoidalBehavior(MotionBehavior[FootPose]):
             dt,
         )
 
-        if duration == 0:
+        if duration == 0.0:
             return self._generate_single_point_trajectory(start)
+
+        sample_times = self._generate_sample_times(
+            duration,
+            dt,
+        )
+
+        points: list[MotionPoint[FootPose]] = []
+
+        for time in sample_times:
+
+            progress = self._evaluate_profile(
+                time,
+                duration,
+            )
+
+            pose = self._interpolate_pose(
+                start,
+                end,
+                progress,
+            )
+
+            points.append(
+                MotionPoint(
+                    position=pose,
+                    velocity=0.0,
+                    acceleration=0.0,
+                    time=time,
+                    dt=dt,
+                )
+            )
+
+        return Trajectory(
+            points=points,
+            duration=duration,
+            distance=0.0,
+            dt=dt,
+            start=start,
+            end=end,
+        )
+
 
     def _validate_inputs(
         self,
