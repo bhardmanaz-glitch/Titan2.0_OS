@@ -34,7 +34,7 @@ def create_leg_trajectory() -> LegTrajectory:
     )
 
     axis = Trajectory(
-        points=[point],
+        points=(point,),
         duration=0.0,
         distance=0.0,
         dt=0.02,
@@ -133,3 +133,15 @@ def test_execute_runs_every_leg():
     assert rf.trajectory is robot.right_front
     assert lr.trajectory is robot.left_rear
     assert rr.trajectory is robot.right_rear
+
+def test_execute_rejects_wrong_type():
+
+    executor = RobotExecutor(
+        left_front=FakeLegExecutor(),
+        right_front=FakeLegExecutor(),
+        left_rear=FakeLegExecutor(),
+        right_rear=FakeLegExecutor(),
+    )
+
+    with pytest.raises(TypeError):
+        executor.execute("not a trajectory")

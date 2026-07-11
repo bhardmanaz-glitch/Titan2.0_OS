@@ -25,9 +25,6 @@ class RobotExecutor:
         trajectory: RobotTrajectory,
     ) -> RobotTrajectory:
 
-        if trajectory is None:
-            raise TypeError("trajectory cannot be None")
-
         if not isinstance(trajectory, RobotTrajectory):
             raise TypeError(
                 f"Expected RobotTrajectory, got {type(trajectory).__name__}"

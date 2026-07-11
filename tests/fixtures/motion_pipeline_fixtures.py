@@ -67,3 +67,12 @@ def leg_planner(
         foot_planner=foot_planner,
         mapper=trajectory_mapper,
     )
+
+@pytest.fixture
+def motion_pipeline(
+    leg_planner,
+):
+    """
+    Fully assembled single-leg motion pipeline.
+    """
+    return leg_planner
