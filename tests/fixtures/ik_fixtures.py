@@ -1,8 +1,11 @@
 import pytest
 
-from titan.kinematics.ik import IKSolver
+from titan.hardware.prototype import PROTOTYPE_LEG
+from titan.kinematics.inverse_kinematics import InverseKinematics
 
 
 @pytest.fixture
-def ik_solver():
-    return IKSolver()
+def inverse_kinematics():
+    return InverseKinematics(
+        PROTOTYPE_LEG,
+    )

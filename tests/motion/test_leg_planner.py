@@ -1,70 +1,161 @@
 import pytest
 
-from titan.motion.trajectory import (
-    LegTrajectory,
-    Trajectory,
-)
+from titan.motion.foot_pose import FootPose
+from titan.motion.leg_planner import LegPlanner
+from titan.motion.trajectory import LegTrajectory
 
-def test_generate_returns_leg_trajectory(leg_planner):
 
-    leg = leg_planner.generate(
-        foot_start=(.100, -.150),
-        foot_end=(.150, -.150),
+class FakeFootPlanner:
+
+    def __init__(self):
+        self.calls = []
+        self.result = object()
+
+    def generate(
+        self,
+        start,
+        end,
+        duration,
+        dt,
+    ):
+        self.calls.append(
+            (
+                start,
+                end,
+                duration,
+                dt,
+            )
+        )
+
+        return self.result
+
+
+class FakeTrajectoryMapper:
+
+    def __init__(self):
+        self.calls = []
+        self.result = LegTrajectory(
+            hip=object(),
+            knee=object(),
+        )
+
+    def map(
+        self,
+        trajectory,
+    ):
+        self.calls.append(trajectory)
+        return self.result
+
+
+@pytest.fixture
+def foot_planner():
+    return FakeFootPlanner()
+
+
+@pytest.fixture
+def mapper():
+    return FakeTrajectoryMapper()
+
+
+@pytest.fixture
+def planner(
+    foot_planner,
+    mapper,
+):
+    return LegPlanner(
+        foot_planner=foot_planner,
+        mapper=mapper,
     )
 
-    assert isinstance(leg, LegTrajectory)
 
-def test_hip_is_trajectory(leg_planner):
+def test_create_leg_planner(
+    foot_planner,
+    mapper,
+):
 
-    leg = leg_planner.generate(
-        foot_start=(.100, -.150),
-        foot_end=(.150, -.150),
+    planner = LegPlanner(
+        foot_planner,
+        mapper,
     )
 
-    assert isinstance(leg.hip, Trajectory)
-
-def test_knee_is_trajectory(leg_planner):
-
-    leg = leg_planner.generate(
-        foot_start=(.100, -.150),
-        foot_end=(.150, -.150),
+    assert isinstance(
+        planner,
+        LegPlanner,
     )
 
-    assert isinstance(leg.knee, Trajectory)
 
-def test_joint_sample_counts_match(leg_planner):
+def test_generate_delegates_to_foot_planner(
+    planner,
+    foot_planner,
+):
 
-    leg = leg_planner.generate(
-        foot_start=(.100, -.150),
-        foot_end=(.150, -.150),
+    start = FootPose(
+        0.30,
+        -0.45,
     )
 
-    assert len(leg.hip) == len(leg.knee)
-
-def test_duration_matches(leg_planner):
-
-    leg = leg_planner.generate(
-        foot_start=(.100, -.150),
-        foot_end=(.150, -.150),
+    end = FootPose(
+        0.35,
+        -0.45,
     )
 
-    assert leg.hip.duration == pytest.approx(
-        leg.knee.duration
+    planner.generate(
+        start,
+        end,
+        duration=1.0,
+        dt=0.02,
     )
 
-def test_reverse_motion(leg_planner):
+    assert foot_planner.calls == [
+        (
+            start,
+            end,
+            1.0,
+            0.02,
+        )
+    ]
 
-    start = leg_planner.ik_solver.solve(.150, -.150)
-    end   = leg_planner.ik_solver.solve(.100, -.150)
 
-    leg = leg_planner.generate(
-        foot_start=(.150, -.150),
-        foot_end=(.100, -.150),
-    )   
+def test_generate_passes_trajectory_to_mapper(
+    planner,
+    foot_planner,
+    mapper,
+):
 
-    assert leg.hip.first.position == pytest.approx(start.hip)
-    assert leg.hip.last.position  == pytest.approx(end.hip)
+    planner.generate(
+        FootPose(
+            0.30,
+            -0.45,
+        ),
+        FootPose(
+            0.35,
+            -0.45,
+        ),
+        duration=1.0,
+        dt=0.02,
+    )
 
-    assert leg.knee.first.position == pytest.approx(start.knee)
-    assert leg.knee.last.position  == pytest.approx(end.knee)
+    assert mapper.calls == [
+        foot_planner.result,
+    ]
 
+
+def test_generate_returns_mapper_result(
+    planner,
+    mapper,
+):
+
+    result = planner.generate(
+        FootPose(
+            0.30,
+            -0.45,
+        ),
+        FootPose(
+            0.35,
+            -0.45,
+        ),
+        duration=1.0,
+        dt=0.02,
+    )
+
+    assert result is mapper.result

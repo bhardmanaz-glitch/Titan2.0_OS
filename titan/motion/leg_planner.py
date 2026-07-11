@@ -1,85 +1,49 @@
+"""
+Titan 2.0 Operating System
+
+Leg Planner
+
+Coordinates Cartesian planning and trajectory mapping.
+"""
+
+from titan.motion.foot_planner import FootPlanner
 from titan.motion.trajectory import LegTrajectory
+from titan.motion.trajectory_mapper import TrajectoryMapper
+from titan.motion.foot_pose import FootPose
 
 
 class LegPlanner:
     """
-    Uses inverse kinematics to convert a foot movement into
-    synchronized hip and knee trajectories.
+    Generates executable leg trajectories by composing
+    a FootPlanner and a TrajectoryMapper.
     """
 
     def __init__(
         self,
-        ik_solver,
-        trajectory_planner,
+        foot_planner: FootPlanner,
+        mapper: TrajectoryMapper,
     ):
-        self.ik_solver = ik_solver
-        self.trajectory_planner = trajectory_planner
+        self.foot_planner = foot_planner
+        self.mapper = mapper
 
     def generate(
-    self,
-    foot_start,
-    foot_end,
-    duration=None,
-    dt=0.02,
-    ):
+        self,
+        foot_start: FootPose,
+        foot_end: FootPose,
+        duration: float = 1.0,
+        dt: float = 0.02,
+    ) -> LegTrajectory:
+        """
+        Generate an executable leg trajectory.
+        """
 
-        start = self.ik_solver.solve(*foot_start)
-        end = self.ik_solver.solve(*foot_end)
-
-        if not start.reachable:
-            raise ValueError("Starting foot position is unreachable.")
-
-        if not end.reachable:
-            raise ValueError("Ending foot position is unreachable.")
-
-        #
-        # First determine how long each joint needs.
-        #
-        hip_plan = self.trajectory_planner.plan(
-            start=start.hip,
-            end=end.hip,
+        foot_trajectory = self.foot_planner.generate(
+            start=foot_start,
+            end=foot_end,
             duration=duration,
             dt=dt,
         )
 
-        knee_plan = self.trajectory_planner.plan(
-            start=start.knee,
-            end=end.knee,
-            duration=duration,
-            dt=dt,
-        )
-
-        #
-        # Synchronize the joints.
-        #
-        if duration is None:
-            duration = max(
-                hip_plan.duration,
-                knee_plan.duration,
-            )
-
-            print()
-            print("Synchronized Duration")
-            print(duration)
-
-        #
-        # Now generate synchronized trajectories.
-        #
-        hip = self.trajectory_planner.generate(
-            start=start.hip,
-            end=end.hip,
-            duration=duration,
-            dt=dt,
-        )
-
-        knee = self.trajectory_planner.generate(
-            start=start.knee,
-            end=end.knee,
-            duration=duration,
-            dt=dt,
-        )
-
-        return LegTrajectory(
-            hip=hip,
-            knee=knee,
+        return self.mapper.map(
+            foot_trajectory,
         )

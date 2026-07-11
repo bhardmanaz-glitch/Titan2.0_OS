@@ -6,17 +6,12 @@ from titan.motion.leg_planner import LegPlanner
 
 @pytest.fixture
 def robot_planner(
-    ik_solver,
-    linear_planner,
+    leg_planner,
 ):
-    leg = LegPlanner(
-        ik_solver=ik_solver,
-        trajectory_planner=linear_planner,
-    )
 
     return RobotTrajectoryPlanner(
-        left_front=leg,
-        right_front=leg,
-        left_rear=leg,
-        right_rear=leg,
+        left_front=leg_planner,
+        right_front=leg_planner,
+        left_rear=leg_planner,
+        right_rear=leg_planner,
     )

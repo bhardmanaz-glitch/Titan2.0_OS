@@ -1,7 +1,5 @@
-import pytest
 import math
 
-from titan.hardware.prototype import PROTOTYPE_LEG
 from titan.hardware.leg import Leg
 from titan.motion.foot_pose import FootPose
 from titan.motion.joint_pose import JointPose
@@ -90,7 +88,7 @@ class InverseKinematics:
             * self.femur_length
             * self.tibia_length
         )
-
+        cos_knee = max(-1.0, min(1.0, cos_knee))
         interior = math.acos(cos_knee)
 
         knee = math.pi - interior
@@ -105,10 +103,8 @@ class InverseKinematics:
             * r
         )
 
-        alpha = math.acos(cos_alpha)
-
-        cos_knee = max(-1.0, min(1.0, cos_knee))
         cos_alpha = max(-1.0, min(1.0, cos_alpha))
+        alpha = math.acos(cos_alpha)
 
         foot_angle = math.atan2(
             pose.y,

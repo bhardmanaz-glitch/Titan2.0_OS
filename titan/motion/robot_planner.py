@@ -1,3 +1,4 @@
+from titan.motion.foot_pose import FootPose
 from titan.motion.robot_trajectory import RobotTrajectory
 
 
@@ -28,34 +29,34 @@ class RobotTrajectoryPlanner:
         left_rear_end,
         right_rear_start,
         right_rear_end,
-        duration=None,
-        dt=0.02,
+        duration: float = 1.0,
+        dt: float = 0.02,
     ):
 
         fl = self.left_front.generate(
-            foot_start=left_front_start,
-            foot_end=left_front_end,
+            foot_start=FootPose(*left_front_start),
+            foot_end=FootPose(*left_front_end),
             duration=duration,
             dt=dt,
         )
 
         fr = self.right_front.generate(
-            foot_start=right_front_start,
-            foot_end=right_front_end,
+            foot_start=FootPose(*right_front_start),
+            foot_end=FootPose(*right_front_end),
             duration=duration,
             dt=dt,
         )
 
         rl = self.left_rear.generate(
-            foot_start=left_rear_start,
-            foot_end=left_rear_end,
+            foot_start=FootPose(*left_rear_start),
+            foot_end=FootPose(*left_rear_end),
             duration=duration,
             dt=dt,
         )
 
         rr = self.right_rear.generate(
-            foot_start=right_rear_start,
-            foot_end=right_rear_end,
+            foot_start=FootPose(*right_rear_start),
+            foot_end=FootPose(*right_rear_end),
             duration=duration,
             dt=dt,
         )
