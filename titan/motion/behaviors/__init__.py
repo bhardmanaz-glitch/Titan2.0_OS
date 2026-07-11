@@ -1,1 +1,2 @@
 from .behavior import MotionBehavior
+from .trapezoidal_behavior import TrapezoidalBehavior

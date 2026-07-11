@@ -1,13 +1,12 @@
 from dataclasses import dataclass, field
+from typing import Generic, TypeVar
+
+T = TypeVar("T")
 
 
-@dataclass
-class MotionPoint:
-    """
-    One point in a trajectory.
-    """
-
-    position: float
+@dataclass(frozen=True)
+class MotionPoint(Generic[T]):
+    position: T
     velocity: float
     acceleration: float
     time: float
@@ -38,24 +37,16 @@ class MotionPlan:
     dt: float
 
 
-@dataclass(slots=True)
-class Trajectory:
-    """
-    A generated motion trajectory.
-
-    Stores the generated MotionPoints together with
-    the metadata used to generate them.
-    """
-
-    points: list[MotionPoint]
+@dataclass(frozen=True)
+class Trajectory(Generic[T]):
+    points: list[MotionPoint[T]]
 
     duration: float
     distance: float
-
     dt: float
 
-    start: float
-    end: float
+    start: T
+    end: T
 
     metadata: dict = field(default_factory=dict)
 

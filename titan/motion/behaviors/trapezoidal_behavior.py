@@ -97,3 +97,31 @@ class TrapezoidalBehavior(MotionBehavior[FootPose]):
             return times
 
         return (*times, duration)
+    
+    def _evaluate_profile(
+        self,
+        time: float,
+        duration: float,
+    ) -> float:
+        """
+        Evaluate the normalized progress of the motion profile.
+
+        Returns a value in the range [0.0, 1.0].
+        """
+
+        return time / duration
+    
+    def _interpolate_pose(
+        self,
+        start: FootPose,
+        end: FootPose,
+        progress: float,
+    ) -> FootPose:
+        """
+        Linearly interpolate between two Cartesian foot poses.
+        """
+
+        return FootPose(
+            x=start.x + (end.x - start.x) * progress,
+            y=start.y + (end.y - start.y) * progress,
+        )
