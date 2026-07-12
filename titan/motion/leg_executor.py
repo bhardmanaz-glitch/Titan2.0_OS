@@ -1,3 +1,4 @@
+from titan.hardware.commissioned_joint import CommissionedJoint
 from titan.motion.scheduler import ExecutionScheduler
 from titan.motion.executor import TrajectoryExecutor
 from titan.motion.trajectory import LegTrajectory
@@ -10,11 +11,19 @@ class LegExecutor:
 
     def __init__(
         self,
-        hip_executor: TrajectoryExecutor,
-        knee_executor: TrajectoryExecutor,
+        hip_joint: CommissionedJoint,
+        knee_joint: CommissionedJoint,
     ):
-        self.hip_executor = hip_executor
-        self.knee_executor = knee_executor
+        self.hip_joint = hip_joint
+        self.knee_joint = knee_joint
+
+        self.hip_executor = TrajectoryExecutor(
+            hip_joint,
+        )
+
+        self.knee_executor = TrajectoryExecutor(
+            knee_joint,
+        )
 
         self.scheduler = ExecutionScheduler()
 

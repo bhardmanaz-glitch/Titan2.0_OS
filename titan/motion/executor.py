@@ -14,26 +14,28 @@ from titan.motion.trajectory import (
     MotionPoint,
     Trajectory,
 )
-
+from titan.hardware.commissioned_joint import (
+    CommissionedJoint,
+)
 
 class TrajectoryExecutor:
-    """
-    Executes a trajectory by sending each MotionPoint
-    to an AxisDriver.
-    """
 
     def __init__(
         self,
-        driver,
+        joint: CommissionedJoint,
         *,
         delay=0.0,
         callback=None,
     ):
-        self.driver = driver
+
+        self.joint = joint
+
         self.delay = delay
+
         self.callback = callback
 
         self._running = False
+
         self._stop_requested = False
 
     def execute(
@@ -82,8 +84,12 @@ class TrajectoryExecutor:
         Execute a single MotionPoint.
         """
 
-        self.driver.move_to(
+        command = self.joint.mapper.map(
             point.position,
+        )
+
+        self.joint.driver.move_to(
+            command.position,
         )
 
         if self.callback:

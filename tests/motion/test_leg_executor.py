@@ -1,26 +1,25 @@
+import pytest
+
+from titan.motion import trajectory
 from titan.motion.trajectory import (
     MotionPoint,
     Trajectory,
     LegTrajectory,
 )
-
-from titan.hardware.mock_axis import MockAxis
-from titan.motion.executor import TrajectoryExecutor
 from titan.motion.leg_executor import LegExecutor
 
 
-def test_create_leg_executor():
+def test_create_leg_executor(
+    leg_executor,
+    hip_joint,
+    knee_joint,
+):
 
-    hip = TrajectoryExecutor(MockAxis())
-    knee = TrajectoryExecutor(MockAxis())
+    assert leg_executor.hip_joint is hip_joint
+    assert leg_executor.knee_joint is knee_joint
 
-    executor = LegExecutor(
-        hip_executor=hip,
-        knee_executor=knee,
-    )
-
-    assert executor.hip_executor is hip
-    assert executor.knee_executor is knee
+    assert leg_executor.hip_executor.joint is hip_joint
+    assert leg_executor.knee_executor.joint is knee_joint
 
 def create_trajectory():
 
@@ -99,55 +98,63 @@ def create_leg_trajectory():
         knee=create_trajectory(),
     )
 
-def test_execute_returns_leg_trajectory():
+def test_execute_returns_leg_trajectory(
+    leg_executor,
+):
 
     leg = create_leg_trajectory()
 
-    hip = TrajectoryExecutor(MockAxis())
-    knee = TrajectoryExecutor(MockAxis())
-
-    executor = LegExecutor(
-        hip_executor=hip,
-        knee_executor=knee,
-    )
-
-    result = executor.execute(leg)
+    result = leg_executor.execute(leg)
 
     assert result is leg
 
-def test_execute_moves_both_axes():
-
-    hip_axis = MockAxis()
-    knee_axis = MockAxis()
-
-    executor = LegExecutor(
-        hip_executor=TrajectoryExecutor(hip_axis),
-        knee_executor=TrajectoryExecutor(knee_axis),
-    )
+def test_execute_moves_both_axes(
+    leg_executor,
+    hip_joint,
+    knee_joint,
+):
 
     leg = create_leg_trajectory()
 
-    executor.execute(leg)
+    leg_executor.execute(leg)
 
-    assert hip_axis.position == leg.hip.last.position
-    assert knee_axis.position == leg.knee.last.position
-
-def test_execute_different_length_trajectories():
-
-    hip_axis = MockAxis()
-    knee_axis = MockAxis()
-
-    executor = LegExecutor(
-        hip_executor=TrajectoryExecutor(hip_axis),
-        knee_executor=TrajectoryExecutor(knee_axis),
+    expected_hip = hip_joint.mapper.map(
+        leg.hip.last.position
     )
+
+    expected_knee = knee_joint.mapper.map(
+        leg.knee.last.position
+    )
+
+    assert hip_joint.driver.position == pytest.approx(
+        expected_hip.position
+    )
+
+    assert knee_joint.driver.position == pytest.approx(
+        expected_knee.position
+)   
+
+def test_execute_different_length_trajectories(
+    leg_executor,
+    hip_joint,
+    knee_joint,
+):
 
     trajectory = LegTrajectory(
         hip=create_long_trajectory(),
         knee=create_short_trajectory(),
     )
 
-    executor.execute(trajectory)
+    leg_executor.execute(trajectory)
 
-    assert hip_axis.position == 4.0
-    assert knee_axis.position == 1.0
+    expected_hip = hip_joint.mapper.map(4.0)
+
+    assert hip_joint.driver.position == pytest.approx(
+        expected_hip.position
+    )
+
+    expected_knee = knee_joint.mapper.map(1.0)
+
+    assert knee_joint.driver.position == pytest.approx(
+        expected_knee.position
+    )

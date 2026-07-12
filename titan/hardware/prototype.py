@@ -5,6 +5,7 @@ from titan.hardware.joint import Joint
 from titan.hardware.link import Link
 from titan.hardware.foot import Foot
 from titan.hardware.leg import Leg
+from titan.hardware.robot import Robot
 
 hip_motor = Motor(
     name="Cubemars GL40",
@@ -72,3 +73,9 @@ PROTOTYPE_LEG = Leg(
     foot=foot,
 )
 
+PROTOTYPE_ROBOT = Robot(
+    left_front=PROTOTYPE_LEG,
+    right_front=PROTOTYPE_LEG,
+    left_rear=PROTOTYPE_LEG,
+    right_rear=PROTOTYPE_LEG,
+)

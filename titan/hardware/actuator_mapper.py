@@ -16,8 +16,8 @@ class ActuatorMapper:
     def __init__(
         self,
         gear_ratio: float,
-        sign: int,
-        zero_offset: float,
+        sign: int = 1,
+        zero_offset: float = 0.0,
     ):
         self.gear_ratio = gear_ratio
         self.sign = sign

@@ -1,21 +1,24 @@
 import time
 import pytest
 
+from titan.hardware.prototype import PROTOTYPE_LEG
 from titan.motion.trajectory import (
     MotionPoint,
     Trajectory,
 )
 from titan.motion.executor import TrajectoryExecutor
 from titan.hardware.mock_axis import MockAxis
+from titan.hardware.commissioned_joint import (
+    CommissionedJoint,
+)
 
 
-def test_create_executor():
-
-    driver = MockAxis()
-
-    executor = TrajectoryExecutor(driver)
-
-    assert executor.driver is driver
+def test_create_executor(
+    executor,
+    commissioned_joint,
+):
+  
+    assert executor.joint is commissioned_joint
 
 def create_trajectory():
 
@@ -43,11 +46,9 @@ def create_trajectory():
         end=1.0,
     )
 
-def test_execute_returns_trajectory():
-
-    driver = MockAxis()
-
-    executor = TrajectoryExecutor(driver)
+def test_execute_returns_trajectory(
+    executor,
+):
 
     trajectory = create_trajectory()
 
@@ -55,11 +56,9 @@ def test_execute_returns_trajectory():
 
     assert result is trajectory
 
-def test_execute_visits_every_point():
-
-    driver = MockAxis()
-
-    executor = TrajectoryExecutor(driver)
+def test_execute_visits_every_point(
+        executor,
+):
 
     trajectory = create_trajectory()
 
@@ -74,61 +73,72 @@ def test_execute_visits_every_point():
 
     assert len(visited) == len(trajectory)
 
-def test_execute_commands_every_point():
+def test_execute_commands_every_point(
+        executor,
+        commissioned_joint,
+):
 
-    driver = MockAxis()
-
-    executor = TrajectoryExecutor(driver)
 
     trajectory = create_trajectory()
 
     executor.execute(trajectory)
 
-    assert driver.commanded_positions == [
-        point.position
+    expected = [
+        commissioned_joint.mapper.map(point.position).position
         for point in trajectory
     ]
 
-def test_execute_moves_axis_to_final_position():
+    assert commissioned_joint.driver.commanded_positions == pytest.approx(
+        expected
+    )
 
-    driver = MockAxis()
-
-    executor = TrajectoryExecutor(driver)
+def test_execute_moves_axis_to_final_position(
+        executor,
+        commissioned_joint,
+):
 
     trajectory = create_trajectory()
 
     executor.execute(trajectory)
 
-    assert driver.position == trajectory.last.position
+    expected = commissioned_joint.mapper.map(
+        trajectory.last.position
+    )
 
-def test_wait_until_next_point():
+    assert commissioned_joint.driver.position == pytest.approx(
+        expected.position
+    )
 
-    driver = MockAxis()
-
-    executor = TrajectoryExecutor(driver)
+def test_wait_until_next_point(
+        executor,
+        
+):
 
     executor._wait_until_next_point(
         start_time=time.perf_counter(),
         dt=0.0,
     )
 
-def test_executor_starts_not_running():
+def test_executor_starts_not_running(
+        executor,
+        
+):
 
-    executor = TrajectoryExecutor(MockAxis())
 
     assert executor.running is False
 
-def test_executor_stop_requests_stop():
-
-    executor = TrajectoryExecutor(MockAxis())
+def test_executor_stop_requests_stop(
+        executor,
+        
+):
 
     executor.stop()
 
     assert executor.stop_requested
 
-def test_execute_clears_stop_request():
-
-    executor = TrajectoryExecutor(MockAxis())
+def test_execute_clears_stop_request(
+        executor,
+):
 
     executor.stop()
 
@@ -138,9 +148,9 @@ def test_execute_clears_stop_request():
 
     assert executor.stop_requested is False
 
-def test_execute_not_running_when_finished():
-
-    executor = TrajectoryExecutor(MockAxis())
+def test_execute_not_running_when_finished(
+        executor,
+):
 
     trajectory = create_trajectory()
 
@@ -148,11 +158,10 @@ def test_execute_not_running_when_finished():
 
     assert executor.running is False
 
-def test_execute_calls_callback_for_every_point():
-
-    driver = MockAxis()
-
-    executor = TrajectoryExecutor(driver)
+def test_execute_calls_callback_for_every_point(
+        executor,
+        
+):
 
     trajectory = create_trajectory()
 
@@ -165,11 +174,9 @@ def test_execute_calls_callback_for_every_point():
 
     assert len(visited) == len(trajectory)
 
-def test_callback_receives_points_in_order():
-
-    driver = MockAxis()
-
-    executor = TrajectoryExecutor(driver)
+def test_callback_receives_points_in_order(
+        executor,
+):
 
     trajectory = create_trajectory()
 
@@ -182,21 +189,20 @@ def test_callback_receives_points_in_order():
 
     assert visited == trajectory.points
 
-def test_execute_without_callback():
-
-    driver = MockAxis()
-
-    executor = TrajectoryExecutor(driver)
+def test_execute_without_callback(
+        executor,
+):
 
     trajectory = create_trajectory()
 
     executor.execute(trajectory)
 
-def test_process_point_moves_axis():
-
-    axis = MockAxis()
-
-    executor = TrajectoryExecutor(axis)
+def test_process_point_moves_axis(
+        executor,
+        commissioned_joint,
+):
+    
+    driver = commissioned_joint.driver 
 
     point = MotionPoint(
         position=3.5,
@@ -208,4 +214,10 @@ def test_process_point_moves_axis():
 
     executor.process_point(point)
 
-    assert axis.position == 3.5
+    expected = commissioned_joint.mapper.map(
+        point.position
+    )
+
+    assert driver.position == pytest.approx(
+        expected.position
+    )
