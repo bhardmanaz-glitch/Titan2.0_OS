@@ -59,18 +59,36 @@ class ODriveAxis(AxisDriver):
 
     # ----------------------------------------------------
 
-    def connect(self):
+    def connect(self) -> None:
+        """
+        Connect to an attached ODrive.
 
-        try:
-            import odrive
-        except ImportError:
+        If a serial number was supplied, verify that the discovered
+        controller matches the expected device.
+        """
+
+        print("Importing odrive...", flush=True)
+
+        import odrive
+
+        print("Searching for ODrive...", flush=True)
+
+        self._driver = odrive.find_any()
+
+        print("ODrive found.", flush=True)
+
+        actual_serial = str(self._driver.serial_number)
+
+        if (
+            self.serial_number is not None
+            and actual_serial != self.serial_number
+        ):
             raise RuntimeError(
-                "The ODrive Python package is not installed."
+                f"Connected to ODrive {actual_serial}, "
+                f"expected {self.serial_number}."
             )
 
-        self._driver = odrive.find_any(
-            serial_number=self.serial_number
-        )
+        print(f"Verified serial {actual_serial}.", flush=True)
 
         self._axis = (
             self._driver.axis0
@@ -78,9 +96,13 @@ class ODriveAxis(AxisDriver):
             else self._driver.axis1
         )
 
+        print(f"Axis {self.axis_index} selected.", flush=True)
+
         self._connected = True
 
         self.refresh()
+
+        print("Telemetry refreshed.", flush=True)
 
     # ----------------------------------------------------
 
