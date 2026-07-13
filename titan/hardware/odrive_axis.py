@@ -14,46 +14,59 @@ No motion commands.
 """
 
 from dataclasses import dataclass
+import time
 
 from titan.hardware.axis_driver import AxisDriver
 from titan.hardware.telemetry import Telemetry
 
+AXIS_STATE_IDLE = 1
+AXIS_STATE_CLOSED_LOOP = 8
 
-@dataclass
 class ODriveAxis(AxisDriver):
 
-    serial_number: str | None = None
+    def __init__(
+        self,
+        serial_number: str | None = None,
+        axis_index: int = 0,
+    ):
 
-    axis_index: int = 0
+        self._serial_number = serial_number
+        self.axis_index = axis_index
 
-    _driver = None
+        self._driver = None
+        self._axis = None
 
-    _axis = None
+        self._connected = False
 
-    _connected: bool = False
+        self._position = 0.0
+        self._velocity = 0.0
+        self._current = 0.0
 
-    _position: float = 0.0
-    _velocity: float = 0.0
-    _current: float = 0.0
+        self._bus_voltage = 0.0
+        self._bus_current = 0.0
 
-    _bus_voltage: float = 0.0
-    _bus_current: float = 0.0
+        self._temperature = 0.0
 
-    _temperature: float = 0.0
+        self._axis_state = "UNKNOWN"
 
-    _axis_state: str = "UNKNOWN"
+        self._active_errors = []
 
-    _active_errors: list = None
+        self._disarm_reason = None
 
-    _disarm_reason = None
+        self._firmware_version = "Unknown"
 
-    _firmware_version: str = "Unknown"
+        self._telemetry = None
 
     # ----------------------------------------------------
 
     def connect(self):
 
-        import odrive
+        try:
+            import odrive
+        except ImportError:
+            raise RuntimeError(
+                "The ODrive Python package is not installed."
+            )
 
         self._driver = odrive.find_any(
             serial_number=self.serial_number
@@ -71,19 +84,62 @@ class ODriveAxis(AxisDriver):
 
     # ----------------------------------------------------
 
+    def enter_closed_loop(self) -> None:
+        """
+        Place the axis into CLOSED_LOOP_CONTROL.
+        """
+
+        if not self.connected:
+            raise RuntimeError(
+                "ODriveAxis is not connected."
+            )
+
+        self._axis.requested_state = AXIS_STATE_CLOSED_LOOP
+
+        time.sleep(0.1)
+
+        if self._axis.current_state != AXIS_STATE_CLOSED_LOOP:
+            raise RuntimeError(
+                f"Failed to enter closed loop. Current state: {self._axis.current_state}"
+            )
+
+#-----------------------------------------------------------
+
+    def enter_idle(self) -> None:
+        """
+        Return the axis to IDLE.
+        """
+
+        if not self.connected:
+            raise RuntimeError(
+                "ODriveAxis is not connected."
+            )
+
+        self._axis.requested_state = AXIS_STATE_CLOSED_LOOP
+
+        time.sleep(0.1)
+
+        if self._axis.current_state != AXIS_STATE_CLOSED_LOOP:
+            raise RuntimeError(
+                f"Failed to enter closed loop. Current state: {self._axis.current_state}"
+            )
+
+    #------------------------------------------------------
+
     def move_to(
         self,
         position: float,
     ) -> None:
         """
         Command the axis to a position.
-
-            Hardware implementation coming in a future commit.
         """
 
-        raise NotImplementedError(
-            "ODrive position control not implemented yet."
-        )
+        if not self.connected:
+            raise RuntimeError(
+                "ODriveAxis is not connected."
+            )
+
+        self._axis.controller.input_pos = position
     
     def set_velocity(
         self,
@@ -212,6 +268,10 @@ class ODriveAxis(AxisDriver):
     @property
     def disarm_reason(self):
         return self._disarm_reason
+    
+    @property
+    def serial_number(self):
+        return self._serial_number
 
     @property
     def firmware_version(self):
