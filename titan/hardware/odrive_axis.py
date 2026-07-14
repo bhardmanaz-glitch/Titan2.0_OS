@@ -137,11 +137,11 @@ class ODriveAxis(AxisDriver):
                 "ODriveAxis is not connected."
             )
 
-        self._axis.requested_state = AXIS_STATE_CLOSED_LOOP
+        self._axis.requested_state = AXIS_STATE_IDLE
 
         time.sleep(0.1)
 
-        if self._axis.current_state != AXIS_STATE_CLOSED_LOOP:
+        if self._axis.current_state != AXIS_STATE_IDLE:
             raise RuntimeError(
                 f"Failed to enter closed loop. Current state: {self._axis.current_state}"
             )
@@ -297,4 +297,4 @@ class ODriveAxis(AxisDriver):
 
     @property
     def firmware_version(self):
-        return self._firmware_version
+        return self._firmware_version# TEST FROM NANO
