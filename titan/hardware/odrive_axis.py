@@ -162,6 +162,45 @@ class ODriveAxis(AxisDriver):
             )
 
         self._axis.controller.input_pos = position
+
+    def wait_until_position(
+        self,
+        target: float,
+        tolerance: float = 0.002,
+        timeout: float = 3.0,
+    ) -> None:
+        """
+        Wait until the axis reaches the requested position.
+        """
+
+        if not self.connected:
+            raise RuntimeError(
+                "ODriveAxis is not connected."
+            )
+
+        deadline = time.time() + timeout
+
+        while time.time() < deadline:
+
+            self.refresh()
+
+            error = abs(self.position - target)
+
+            print(
+                f"Target={target:.5f} "
+                f"Current={self.position:.5f} "
+                f"Error={error:.5f}"
+            )
+
+            if error <= tolerance:
+                return
+
+            time.sleep(0.02)
+
+        raise TimeoutError(
+            f"Axis failed to reach {target:.5f} rev "
+            f"(current={self.position:.5f})"
+        )
     
     def set_velocity(
         self,
