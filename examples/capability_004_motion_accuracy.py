@@ -10,6 +10,7 @@ Measure actuator positioning accuracy and repeatability.
 
 import time
 
+from titan.analysis.report import ReportGenerator
 from titan.analysis.experiment import EngineeringExperiment
 from titan.analysis.measurement import MotionMeasurement
 from titan.analysis.statistics import MotionStatistics
